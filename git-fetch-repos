@@ -6,10 +6,6 @@ GITHUB_ORGANIZATION=${GITHUB_ORGANIZATION:=""}
 GITHUB_USER=${GITHUB_USER:=""}
 GITHUB_CHECKOUT_DIR=${GITHUB_CHECKOUT_DIR:=""}
 
-if [ "$GITHUB_ORGANIZATION" == "" ]; then
-    echo "Please configure your GITHUB_ORGANIZATION, GITHUB_USER and GITHUB_CHECKOUT_DIR env variables"
-    exit 1;
-fi
 if [ "$GITHUB_USER" == "" ]; then
     echo "Please configure your GITHUB_ORGANIZATION, GITHUB_USER and GITHUB_CHECKOUT_DIR env variables"
     exit 2;
@@ -48,7 +44,12 @@ else
     if [ "$DEBUGGING" == "1" ]; then
         echo "using tmp file=$TMPFILE"
     fi
-    curl -o "${TMPFILE}" -u "${GITHUB_USER}:${GITHUB_PASS}" --silent --show-error "https://api.github.com/orgs/${GITHUB_ORGANIZATION}/repos?type=all&page=${PAGE}&per_page=100" -q
+    if [ -z "$GITHUB_ORGANIZATION" ]; then
+      BASE_URL="https://api.github.com/users/${GITHUB_USER}/repos"
+    else
+      BASE_URL="https://api.github.com/orgs/${GITHUB_ORGANIZATION}/repos"
+    fi
+    curl -o "${TMPFILE}" -u "${GITHUB_USER}:${GITHUB_PASS}" --silent --show-error "${BASE_URL}?type=all&page=${PAGE}&per_page=100" -q
     if [ "$DEBUGGING" == "1" ]; then
         cat $TMPFILE;
     fi
@@ -81,6 +82,6 @@ else
         done
 
         let PAGE=PAGE+1
-        REPOLIST=`curl -u "${GITHUB_USER}:${GITHUB_PASS}" --silent "https://api.github.com/orgs/${GITHUB_ORGANIZATION}/repos?type=all&page=$PAGE&per_page=100" -q | grep "\"ssh_url\"" | awk -F': "' '{print $2}' | sed -e 's/",//g'`
+        REPOLIST=`curl -u "${GITHUB_USER}:${GITHUB_PASS}" --silent "${BASE_URL}?type=all&page=$PAGE&per_page=100" -q | grep "\"ssh_url\"" | awk -F': "' '{print $2}' | sed -e 's/",//g'`
     done
 fi
