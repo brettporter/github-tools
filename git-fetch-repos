@@ -7,8 +7,20 @@ GITHUB_USER=${GITHUB_USER:=""}
 GITHUB_CHECKOUT_DIR=${GITHUB_CHECKOUT_DIR:=""}
 GITHUB_USER_EMAIL=${GITHUB_USER_EMAIL:=""}
 
+if [ "$GITHUB_CHECKOUT_DIR" == "" ]; then
+  GITHUB_CHECKOUT_DIR=$PWD
+fi
+
+if [ -f "$HOME/.githubrc" ]; then
+  source $HOME/.githubrc
+fi
+
+if [ -f "$GITHUB_CHECKOUT_DIR/.githubrc" ]; then
+  source $GITHUB_CHECKOUT_DIR/.githubrc
+fi
+
 if [ "$GITHUB_USER" == "" ]; then
-    echo "Please configure your GITHUB_ORGANIZATION, GITHUB_USER and GITHUB_CHECKOUT_DIR env variables"
+    echo "Please configure your GITHUB_USER env variable"
     exit 2;
 fi
 echo "using GITHUB_ORGANIZATION=$GITHUB_ORGANIZATION GITHUB_USER=$GITHUB_USER GITHUB_CHECKOUT_DIR=$GITHUB_CHECKOUT_DIR GITHUB_USER_EMAIL=$GITHUB_USER_EMAIL"
